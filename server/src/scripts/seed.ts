@@ -1,6 +1,6 @@
 import { db, initializeDatabase, runQuery } from '../config/database';
 
-console.log('🌱 Seeding database...\n');
+console.log('Seeding database..');
 
 async function seed() {
   try {
@@ -15,43 +15,45 @@ async function seed() {
     await runQuery('DELETE FROM jobs');
     await runQuery('DELETE FROM customers');
     await runQuery('DELETE FROM technicians');
+    
+    await runQuery('DELETE FROM sqlite_sequence WHERE name IN ("customers", "technicians", "jobs", "appointments", "invoices", "payments")');
 
 
     console.log('Creating customers...');
-    const customers = [
-      ['John Smith', '555-123-4567', 'john.smith@email.com', '123 Main St, Springfield, IL'],
-      ['Jane Doe', '555-234-5678', 'jane.doe@email.com', '456 Oak Ave, Riverside, CA'],
-      ['Bob Wilson', '555-345-6789', 'bob.wilson@email.com', '789 Pine Rd, Denver, CO'],
-    ];
-
-    for (const customer of customers) {
-      await runQuery(
-        'INSERT INTO customers (name, phone, email, address) VALUES (?, ?, ?, ?)',
-        customer
-      );
-    }
+    const customer1 = await runQuery(
+      'INSERT INTO customers (name, phone, email, address) VALUES (?, ?, ?, ?)',
+      ['John Smith', '555-123-4567', 'john.smith@email.com', '123 Main St, Springfield, IL']
+    );
+    const customer2 = await runQuery(
+      'INSERT INTO customers (name, phone, email, address) VALUES (?, ?, ?, ?)',
+      ['Jane Doe', '555-234-5678', 'jane.doe@email.com', '456 Oak Ave, Riverside, CA']
+    );
+    const customer3 = await runQuery(
+      'INSERT INTO customers (name, phone, email, address) VALUES (?, ?, ?, ?)',
+      ['Bob Wilson', '555-345-6789', 'bob.wilson@email.com', '789 Pine Rd, Denver, CO']
+    );
 
 
     console.log('Creating technician...');
-    await runQuery(
+    const technician = await runQuery(
       'INSERT INTO technicians (name, phone, email) VALUES (?, ?, ?)',
       ['Taylor', '555-111-2222', 'taylor@company.com']
     );
 
 
     console.log('Creating jobs...');
-    const jobs = [
-      [1, 'Fix AC Unit', 'AC not cooling properly, needs inspection and repair', 'New'],
-      [2, 'Install Thermostat', 'Install new smart thermostat in living room', 'New'],
-      [3, 'Repair Heater', 'Heater making strange noises, urgent repair needed', 'Scheduled'],
-    ];
-
-    for (const job of jobs) {
-      await runQuery(
-        'INSERT INTO jobs (customer_id, title, description, status) VALUES (?, ?, ?, ?)',
-        job
-      );
-    }
+    const job1 = await runQuery(
+      'INSERT INTO jobs (customer_id, title, description, status) VALUES (?, ?, ?, ?)',
+      [customer1.lastID, 'Fix AC Unit', 'AC not cooling properly, needs inspection and repair', 'New']
+    );
+    const job2 = await runQuery(
+      'INSERT INTO jobs (customer_id, title, description, status) VALUES (?, ?, ?, ?)',
+      [customer2.lastID, 'Install Thermostat', 'Install new smart thermostat in living room', 'New']
+    );
+    const job3 = await runQuery(
+      'INSERT INTO jobs (customer_id, title, description, status) VALUES (?, ?, ?, ?)',
+      [customer3.lastID, 'Repair Heater', 'Heater making strange noises, urgent repair needed', 'Scheduled']
+    );
 
 
     console.log('Creating appointment...');
@@ -61,12 +63,12 @@ async function seed() {
     const endTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0, 0);
     await runQuery(
       'INSERT INTO appointments (job_id, technician_id, start_time, end_time) VALUES (?, ?, ?, ?)',
-      [3, 1, startTime.toISOString(), endTime.toISOString()]
+      [job3.lastID, technician.lastID, startTime.toISOString(), endTime.toISOString()]
     );
 
-    console.log('✅ Appointment created');
+    console.log('Appointment created');
 
-    console.log('\n📊 Database seeded successfully!\n');
+    console.log('Database seeded successfully!\n');
     console.log('Summary:');
     console.log('  - Customers: 3');
     console.log('  - Technician: 1 (Taylor)');
